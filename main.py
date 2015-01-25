@@ -6,21 +6,34 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.image import Image
 
+
 class Tile(Image):
     def __init__(self,**kwargs):
-        self.rev_x = kwargs['rev_x']
-        self.rev_y = kwargs['rev_y']
-        self.gridparent = kwargs['rev_caller']
+        self.grid_x = kwargs['grid_x']
+        self.grid_y = kwargs['grid_y']
+        self.gridparent = kwargs['caller']
         super(Image, self).__init__(**kwargs)
 
 
         self.texture = Image(source="assets/tileSand.png").texture
 
-        dif = self.rev_y-int(self.gridparent.gridsize)
+        # La posicio 0,0 a un scatter (relative) es el centre
+        correctx = int(self.gridparent.size[0]/2)-32 # meitat menys mig tile
+        correcty = int(self.gridparent.size[1]/2)-44 # meitat menys un tile
+
+        # Diferencia amb el centre, segons el que mourem horitzontalment les diferents files
+        dif = self.grid_y-int(self.gridparent.gridsize/2)
         offset = 32*dif
 
+        # posicio final amb les diferents correccions i offsetsint(self.gridsize/2)*35
+        self.pos = offset-correctx+self.grid_x*65,correcty-self.grid_y*50
 
-        self.pos = offset+self.rev_x*65,self.rev_y*51
+    # TODO: Aqui algo no va bien...
+    def on_touch_up(self, touch):
+        localtouch = self.to_local(*touch.pos)
+        if self.collide_point(*localtouch):
+            print self.grid_y,self.grid_x,localtouch
+            return True
 
 class HexGrid(ScatterLayout):
     def __init__(self,**kwargs):
@@ -32,7 +45,7 @@ class HexGrid(ScatterLayout):
         
         self.grid = []
         self.pos = 10,10
-        self.size = 455,461
+        self.size = self.gridsize*65,89+(int(self.gridsize/2)*(35+65))
         self.setup()
 
     def setup(self):
@@ -46,9 +59,9 @@ class HexGrid(ScatterLayout):
                 if y==mid or (y < mid and x >= dif) or (y>mid and x<sz-dif):
                     line.append('s')
                     # Graphics
-                    t = Tile(rev_x = x, rev_y = y, rev_caller = self,
-                                  rev_content = 's')
-                    self.add_widget(t,500+y) # tile, zindex
+                    t = Tile(grid_x = x, grid_y = y, caller = self,
+                                  content = 's')
+                    self.add_widget(t) # tile, zindex
                 else:
                     line.append(None)
             self.grid.append(line)
@@ -57,7 +70,7 @@ class HexGrid(ScatterLayout):
 class HexlandGame(Widget):
 
     def setup(self):
-        self.grid = HexGrid(gridsize = 7)
+        self.grid = HexGrid(gridsize = 5)
         self.add_widget(self.grid)
 
 
