@@ -1,12 +1,12 @@
 #:kivy 1.8.0
 
 # For debug
-<Widget>:
-    canvas.after:
-        Line:
-            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
-            dash_offset: 5
-            dash_length: 3
+#<Widget>:
+#    canvas.after:
+#        Line:
+#            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+#            dash_offset: 5
+#            dash_length: 3
 
 <HexlandGame>:
     canvas.before:
@@ -16,18 +16,20 @@
             pos: self.pos
             size: self.size
 
-<HexGrid>:
-    canvas.before:
-        Color:
-            rgba: 1, 0, 0, 1
-        Rectangle:
-            size: self.size
-
-
 <Tile>:
-    size_hint: None,None # Desactivem size_hint
-    size: 65,89
+    # Desactivem size_hint
+    size_hint: None,None
+    # mida imatge tile
+    size: 65,89 
+    # Punts hexagon superior
+    p1: 33, 22
+    p2: 0, 38
+    p3: 0, 72
+    p4: 32, 88
+    p5: 64, 72
+    p6: 64, 38
+
     Image:
-        source: root.img # definida al pare
+        source: root.imgsource # definida al pare
         size: root.size # posicio i mida del pare
         pos: root.pos

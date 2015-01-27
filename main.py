@@ -8,15 +8,48 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.image import Image
+from kivy.properties import StringProperty,NumericProperty,ListProperty
 
+# Permet detectar colisio sobre qualsevol poligon
+# poly es una llista de parelles (x,y), punts formant el poligon
+def point_inside_polygon(x, y, poly):
+    '''Source: http://www.ariel.com.au/a/python-point-int-poly.html'''
+    n = len(poly)
+    inside = False
+    p1x = poly[0]
+    p1y = poly[1]
+    for i in range(0, n + 2, 2):
+        p2x = poly[i % n]
+        p2y = poly[(i + 1) % n]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x, p1y = p2x, p2y
+    return inside
 
 class Tile(Widget):
+    imgsource = StringProperty()
+    grid_x = NumericProperty()
+    grid_y = NumericProperty()
+
+    # Hexagon points: Punts del hexagon en la part superior, pel control de colisions
+    p1 = ListProperty([0, 0])
+    p2 = ListProperty([0, 0])
+    p3 = ListProperty([0, 0])
+    p4 = ListProperty([0, 0])
+    p5 = ListProperty([0, 0])
+    p6 = ListProperty([0, 0])
+
     def __init__(self,**kwargs):
 
+        self.imgsource = "assets/tileSand.png"
         self.grid_x = kwargs['grid_x']
         self.grid_y = kwargs['grid_y']
         self.gridparent = kwargs['caller']
-        self.img = "assets/tileSand.png"
 
         super(Tile, self).__init__(**kwargs)
 
@@ -28,12 +61,17 @@ class Tile(Widget):
         # perque tingui sentit amb l'array guardada
         self.pos = offset+self.grid_x*65,(self.gridparent.gridsize-self.grid_y-1)*50
 
-    # TODO: Aqui algo no va bien...
     def on_touch_up(self, touch):
-        localtouch = self.to_local(*touch.pos)
-        if self.collide_point(*localtouch):
-            print self.grid_y,self.grid_x,localtouch
+        # Si no ha sigut drag i fa colisio...
+        if touch.pos == touch.opos and self.collide_point(*touch.pos):
+            self.imgsource = "assets/tileGrass.png"
             return True
+
+    # Sobreescribim funcio
+    def collide_point(self, x, y):
+        x, y = self.to_local(x, y, True) # relatiu
+        return point_inside_polygon(x, y,
+                self.p1 + self.p2 + self.p3 + self.p4 + self.p5 + self.p6)
 
 class HexGrid(ScatterLayout):
     def __init__(self,**kwargs):
@@ -69,10 +107,8 @@ class HexGrid(ScatterLayout):
 class HexlandGame(Widget):
 
     def setup(self):
-        self.grid = HexGrid(gridsize = 5)
+        self.grid = HexGrid(gridsize = 7)
         self.add_widget(self.grid)
-
-
 
 class HexlandApp(App):
     def build(self):
