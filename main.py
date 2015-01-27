@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import kivy
 kivy.require('1.8.0')
 
@@ -7,26 +10,23 @@ from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.image import Image
 
 
-class Tile(Image):
+class Tile(Widget):
     def __init__(self,**kwargs):
+
         self.grid_x = kwargs['grid_x']
         self.grid_y = kwargs['grid_y']
         self.gridparent = kwargs['caller']
-        super(Image, self).__init__(**kwargs)
+        self.img = "assets/tileSand.png"
 
-
-        self.texture = Image(source="assets/tileSand.png").texture
-
-        # La posicio 0,0 a un scatter (relative) es el centre
-        correctx = int(self.gridparent.size[0]/2)-32 # meitat menys mig tile
-        correcty = int(self.gridparent.size[1]/2)-44 # meitat menys un tile
+        super(Tile, self).__init__(**kwargs)
 
         # Diferencia amb el centre, segons el que mourem horitzontalment les diferents files
         dif = self.grid_y-int(self.gridparent.gridsize/2)
         offset = 32*dif
 
-        # posicio final amb les diferents correccions i offsetsint(self.gridsize/2)*35
-        self.pos = offset-correctx+self.grid_x*65,correcty-self.grid_y*50
+        # posicio final, tenint en compte que y=0 està abaix, girem vertricalment
+        # perque tingui sentit amb l'array guardada
+        self.pos = offset+self.grid_x*65,(self.gridparent.gridsize-self.grid_y-1)*50
 
     # TODO: Aqui algo no va bien...
     def on_touch_up(self, touch):
@@ -59,8 +59,7 @@ class HexGrid(ScatterLayout):
                 if y==mid or (y < mid and x >= dif) or (y>mid and x<sz-dif):
                     line.append('s')
                     # Graphics
-                    t = Tile(grid_x = x, grid_y = y, caller = self,
-                                  content = 's')
+                    t = Tile(grid_x = x, grid_y = y, caller = self, content = 's')
                     self.add_widget(t) # tile, zindex
                 else:
                     line.append(None)
