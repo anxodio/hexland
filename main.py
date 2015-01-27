@@ -74,6 +74,9 @@ class Tile(Widget):
                 self.p1 + self.p2 + self.p3 + self.p4 + self.p5 + self.p6)
 
 class HexGrid(ScatterLayout):
+    gridsize = NumericProperty()
+    grid = ListProperty()
+
     def __init__(self,**kwargs):
         super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.)
         self.gridsize = kwargs['gridsize']
@@ -107,7 +110,7 @@ class HexGrid(ScatterLayout):
 class HexlandGame(Widget):
 
     def setup(self):
-        self.grid = HexGrid(gridsize = 7)
+        self.grid = HexGrid(gridsize = 11)
         self.add_widget(self.grid)
 
 class HexlandApp(App):
