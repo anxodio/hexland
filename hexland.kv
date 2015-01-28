@@ -1,6 +1,6 @@
 #:kivy 1.8.0
 
-# For debug
+# Debug: Pinta els bordes de tots els widgets
 #<Widget>:
 #    canvas.after:
 #        Line:
@@ -29,7 +29,21 @@
     p5: 64, 72
     p6: 64, 38
 
+    # Detall aigua: sota el tile
     Image:
-        source: root.imgsource # definida al pare
+        source: "assets/tileWater_shadow.png"
+        size: root.size # mida del pare
+        pos: root.pos[0],root.pos[1]-22
+
+    # El tile en si mateix
+    Image:
+        source: root.basesource # definida al pare
         size: root.size # posicio i mida del pare
         pos: root.pos
+
+    # Les fitxes: queden a la capa superior
+    Image:
+        source: root.uppersource # definida al pare
+        size: root.size # posicio i mida del pare
+        pos: root.pos[0],root.pos[1]+22
+

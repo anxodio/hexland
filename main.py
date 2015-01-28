@@ -32,7 +32,8 @@ def point_inside_polygon(x, y, poly):
     return inside
 
 class Tile(Widget):
-    imgsource = StringProperty()
+    basesource = StringProperty()
+    uppersource = StringProperty()
     grid_x = NumericProperty()
     grid_y = NumericProperty()
 
@@ -46,7 +47,8 @@ class Tile(Widget):
 
     def __init__(self,**kwargs):
 
-        self.imgsource = "assets/tileSand.png"
+        self.basesource = "assets/tileSand.png"
+        self.uppersource = "assets/tileNone.png"
         self.grid_x = kwargs['grid_x']
         self.grid_y = kwargs['grid_y']
         self.gridparent = kwargs['caller']
@@ -64,7 +66,8 @@ class Tile(Widget):
     def on_touch_up(self, touch):
         # Si no ha sigut drag i fa colisio...
         if touch.pos == touch.opos and self.collide_point(*touch.pos):
-            self.imgsource = "assets/tileGrass.png"
+            self.basesource = "assets/tileDirt_full.png"
+            self.uppersource = "assets/tileGrass.png"
             return True
 
     # Sobreescribim funcio
@@ -110,7 +113,7 @@ class HexGrid(ScatterLayout):
 class HexlandGame(Widget):
 
     def setup(self):
-        self.grid = HexGrid(gridsize = 11)
+        self.grid = HexGrid(gridsize = 5)
         self.add_widget(self.grid)
 
 class HexlandApp(App):
