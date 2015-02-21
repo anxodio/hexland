@@ -16,8 +16,8 @@ class HexlandGame(Widget):
 
 class HexlandApp(App):
     def build(self):
-    	game = HexlandGame()
-    	game.setup()
+        game = HexlandGame()
+        game.setup()
         return game
 
 
