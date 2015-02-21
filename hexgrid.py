@@ -9,6 +9,7 @@ from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.image import Image
 from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty
 from kivy.atlas import Atlas
+from kivy.vector import Vector
 
 from utils import point_inside_polygon
 import random
@@ -48,7 +49,8 @@ class Tile(Widget):
 
     def on_touch_up(self, touch):
         # Si no ha sigut drag i fa colisio...
-        if touch.pos == touch.opos and self.collide_point(*touch.pos):
+        d = Vector(*touch.pos).distance(touch.opos)
+        if d < 10 and self.collide_point(*touch.pos):
             self.gridparent.manageTurn(self)
             return True
 
