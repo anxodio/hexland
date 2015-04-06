@@ -18,6 +18,7 @@ class Tile(Widget):
     grid_x = NumericProperty()
     grid_y = NumericProperty()
     content = NumericProperty()
+    group = NumericProperty()
     upperimg = ObjectProperty()
 
     # Hexagon points: Punts del hexagon en la part superior, pel control de colisions
@@ -30,6 +31,7 @@ class Tile(Widget):
 
     def __init__(self,**kwargs):
 
+        self.group = 0 # No te grup
         self.content = kwargs['content']
         self.gridparent = kwargs['caller']
         self.grid_x = kwargs['grid_x']
@@ -131,8 +133,55 @@ class HexGrid(ScatterLayout):
     def getTile(self,x,y):
         if x >= self.gridsize or y >= self.gridsize: # Ens demanen un tile inexistent
             return None
-
         return self.grid[y][x]
+
+    # Agrupa els tiles connectats
+    def resetTileGroups(self):
+        sz = self.gridsize
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t: t.group = 0 # No te grup
+
+    # Agrupa els tiles connectats
+    def setTileGroups(self):
+        self.resetTileGroups()
+
+        lastGroup = 0
+        sz = self.gridsize
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t and t.content is not 0: # si es 0 no te sentit agrupar
+                    group = 0
+                    for nt in t.getNeighbors():
+                        if nt.content == t.content and nt.group: # Mateix jugador i ja té grup
+                            group = nt.group
+                    if not group: # no hem trobat cap vei amb grup
+                        lastGroup += 1 # Assignem nou grup
+                        group = lastGroup
+                    t.group = group
+
+                    # Li posem als veins del nostre jugador, asegurantnos que no quedi cap penjat
+                    for nt in t.getNeighbors():
+                        if nt.content == t.content: # Mateix jugador
+                            nt.group = group
+
+
+
+    def debugGrid(self):
+        txt = ""
+        sz = self.gridsize
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t:
+                    txt += str(t.group)
+                else: 
+                    txt += " "
+            txt += "\n"
+        print txt
+
 
     def reloadGridGraphics(self):
         # Actualitza els grafics de cada tile
@@ -157,6 +206,8 @@ class HexGrid(ScatterLayout):
             t.content = self.player
             self.reloadGridGraphics()
             self.nextPlayer()
+            self.setTileGroups()
+            self.debugGrid()
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
