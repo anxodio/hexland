@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 
 from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
@@ -47,6 +47,7 @@ class Tile(Widget):
         # perque tingui sentit amb l'array guardada
         self.pos = offset+self.grid_x*65,(self.gridparent.gridsize-self.grid_y-1)*50
 
+    # Metode intern de kivy per detectar touch_up
     def on_touch_up(self, touch):
         # Si no ha sigut drag i fa colisio...
         d = Vector(*touch.pos).distance(touch.opos)
@@ -59,6 +60,16 @@ class Tile(Widget):
         x, y = self.to_local(x, y, True) # relatiu
         return point_inside_polygon(x, y,
                 self.p1 + self.p2 + self.p3 + self.p4 + self.p5 + self.p6)
+
+    def getNeighbors(self):
+        neighbors_positions = [(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1)] # x,y
+        neighbors = []
+        for pos in neighbors_positions:
+            t = self.gridparent.getTile(self.grid_x+pos[0],self.grid_y+pos[1])
+            if t: neighbors.append(t)
+        return neighbors
+
+
 
 class HexGrid(ScatterLayout):
     gridsize = NumericProperty()
@@ -116,6 +127,12 @@ class HexGrid(ScatterLayout):
             self.grid.append(line)
 
         self.reloadGridGraphics()
+
+    def getTile(self,x,y):
+        if x >= self.gridsize or y >= self.gridsize: # Ens demanen un tile inexistent
+            return None
+
+        return self.grid[y][x]
 
     def reloadGridGraphics(self):
         # Actualitza els grafics de cada tile
