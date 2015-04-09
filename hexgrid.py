@@ -76,6 +76,7 @@ class Tile(Widget):
 class HexGrid(ScatterLayout):
     gridsize = NumericProperty()
     grid = ListProperty()
+    deadGroups = ListProperty()
     baseimg = ObjectProperty()
     player = NumericProperty()
 
@@ -143,31 +144,45 @@ class HexGrid(ScatterLayout):
                 t = self.grid[y][x]
                 if t: t.group = 0 # No te grup
 
-    # Agrupa els tiles connectats
+    # Assigna tot el grup. També comprova si es un grup mort
+    def recursiveSetGroup(self,t,grpnum,dead=True):
+        t.group = grpnum
+        for nt in t.getNeighbors():
+            if nt.content == 0:
+                dead = False # el grup té com a minim una llibertat
+            elif not nt.group and nt.content == t.content: # No te grup i mateix jugador
+                dead = self.recursiveSetGroup(nt,grpnum,dead)
+        return dead
+
+    # Agrupa els tiles connectats, aprofita el bucle per comprovar grups morts
     def setTileGroups(self):
         self.resetTileGroups()
+
+        self.deadGroups = []
 
         lastGroup = 0
         sz = self.gridsize
         for y in range(0,sz):
             for x in range(0,sz):
                 t = self.grid[y][x]
-                if t and t.content is not 0: # si es 0 no te sentit agrupar
-                    group = 0
-                    for nt in t.getNeighbors():
-                        if nt.content == t.content and nt.group: # Mateix jugador i ja té grup
-                            group = nt.group
-                    if not group: # no hem trobat cap vei amb grup
-                        lastGroup += 1 # Assignem nou grup
-                        group = lastGroup
-                    t.group = group
+                # si es 0 no te sentit agrupar, i no ha de tenir ja grup assignat
+                if t and t.content and t.group == 0:
+                    # Assignem nou grup
+                    lastGroup += 1
+                    dead = self.recursiveSetGroup(t,lastGroup)
+                    if dead:
+                        self.deadGroups.append(lastGroup)
 
-                    # Li posem als veins del nostre jugador, asegurantnos que no quedi cap penjat
-                    for nt in t.getNeighbors():
-                        if nt.content == t.content: # Mateix jugador
-                            nt.group = group
+        self.deleteGroups()
 
-
+    def deleteGroups(self):
+        if self.deadGroups:
+            sz = self.gridsize
+            for y in range(0,sz):
+                for x in range(0,sz):
+                    t = self.grid[y][x]
+                    if t and t.group in self.deadGroups:
+                        t.content = 0 # buidem casella
 
     def debugGrid(self):
         txt = ""
@@ -176,7 +191,7 @@ class HexGrid(ScatterLayout):
             for x in range(0,sz):
                 t = self.grid[y][x]
                 if t:
-                    txt += str(t.group)
+                    txt += str(t.content)
                 else: 
                     txt += " "
             txt += "\n"
@@ -204,10 +219,16 @@ class HexGrid(ScatterLayout):
     def manageTurn(self,t):
         if t.content == 0: # si ja està ocupada res
             t.content = self.player
-            self.reloadGridGraphics()
-            self.nextPlayer()
             self.setTileGroups()
-            self.debugGrid()
+            # Validem que no hi hagi suicidi
+            if t.group in self.deadGroups:
+                t.content = 0
+                print "INVALID MOVE, SUICIDE!" # TODO: Que no sigui un print xD
+            else:
+                # Correcte, seguim jugada
+                self.deleteGroups()
+                self.nextPlayer()
+                self.reloadGridGraphics()
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
