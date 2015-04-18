@@ -18,8 +18,8 @@ class HexlandGame(Widget):
     def __init__(self, **kwargs):
         super(HexlandGame, self).__init__(**kwargs)
 
-        # self.add_widget(HexGrid(gridsize = 5))
-        self.add_widget(Menu())
+        self.add_widget(HexGrid(gridsize = 5))
+        # self.add_widget(Menu())
 
     def setup(self):
 

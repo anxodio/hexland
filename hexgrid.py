@@ -12,6 +12,10 @@ from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
 
+from kivy.uix.modalview import ModalView
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+
 from utils import point_inside_polygon
 import random
 
@@ -88,13 +92,34 @@ class HexGrid(ScatterLayout):
         # Preparem atlas d'imatges pels tiles
         self.baseatlas = Atlas('assets/basetiles.atlas')
         self.playeratlas = Atlas('assets/playertiles.atlas')
+        self.uiatlas = Atlas('assets/uitiles.atlas')
 
         # Nomes gridsize inparell
         assert(self.gridsize%2 != 0)
 
         self.grid = []
+
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
         
         self.setup()
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if keycode[1] == 'w':
+            view = ModalView(size_hint=(0.4, 0.4))
+            content = Button(text='Close me!')
+            view.add_widget(content)
+
+            # bind the on_press event of the button to the dismiss function
+            content.bind(on_press=view.dismiss)
+
+            # open the view
+            view.open()
+        return True
 
     def setup(self):
         # Torn del jugador per defecte
