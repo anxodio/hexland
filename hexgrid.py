@@ -132,6 +132,9 @@ class HexGrid(ScatterLayout):
         self.reloadGridGraphics()
 
     def getTile(self,x,y):
+        # No es poden demanar index negatius
+        if x < 0 or y < 0:
+            return None
         if x >= self.gridsize or y >= self.gridsize: # Ens demanen un tile inexistent
             return None
         return self.grid[y][x]
