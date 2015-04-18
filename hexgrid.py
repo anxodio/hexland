@@ -12,11 +12,8 @@ from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
 
-from kivy.uix.modalview import ModalView
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-
 from utils import point_inside_polygon
+from utils import launchSimpleModal
 import random
 
 class Tile(Widget):
@@ -54,11 +51,17 @@ class Tile(Widget):
         # perque tingui sentit amb l'array guardada
         self.pos = offset+self.grid_x*65,(self.gridparent.gridsize-self.grid_y-1)*50
 
+    def on_touch_down(self, touch):
+        touch.grab(self) # Preparo el touch (l'agafo)
+
     # Metode intern de kivy per detectar touch_up
     def on_touch_up(self, touch):
-        # Si no ha sigut drag i fa colisio...
+        # Perque sigui valid, ha de començar en aquesta mateixa classe (drag),
+        # no ser drag (distancia) i no ser un press molt llarg (time)
+        time = touch.time_end-touch.time_start
         d = Vector(*touch.pos).distance(touch.opos)
-        if d < 10 and self.collide_point(*touch.pos):
+        if touch.grab_current is self and d < 10 and time < 0.5 and self.collide_point(*touch.pos):
+            touch.ungrab(self)
             self.gridparent.manageTurn(self)
             return True
 
@@ -98,28 +101,8 @@ class HexGrid(ScatterLayout):
         assert(self.gridsize%2 != 0)
 
         self.grid = []
-
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
         
         self.setup()
-
-    def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if keycode[1] == 'w':
-            view = ModalView(size_hint=(0.4, 0.4))
-            content = Button(text='Close me!')
-            view.add_widget(content)
-
-            # bind the on_press event of the button to the dismiss function
-            content.bind(on_press=view.dismiss)
-
-            # open the view
-            view.open()
-        return True
 
     def setup(self):
         # Torn del jugador per defecte
@@ -260,7 +243,7 @@ class HexGrid(ScatterLayout):
             # Validem que no hi hagi suicidi
             if t.group in self.deadGroups:
                 t.content = 0
-                print "INVALID MOVE, SUICIDE!" # TODO: Que no sigui un print xD
+                launchSimpleModal("INVALID MOVE\nYou can't suicide.")
             else:
                 # Correcte, seguim jugada
                 self.deleteGroups()

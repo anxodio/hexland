@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import kivy
+kivy.require('1.9.0')
+
+from kivy.uix.modalview import ModalView
+from kivy.uix.button import Button
 
 # Permet detectar colisio sobre qualsevol poligon
 # poly es una llista de parelles (x,y), punts formant el poligon
@@ -22,3 +27,17 @@ def point_inside_polygon(x, y, poly):
                         inside = not inside
         p1x, p1y = p2x, p2y
     return inside
+
+def launchSimpleModal(text):
+    view = ModalView(size_hint=(0.4, 0.2))
+    content = SimpleModal(text=text)
+    view.add_widget(content)
+    # bind the on_press event of the button to the dismiss function
+    content.bind(on_press=view.dismiss)
+    # open the view
+    view.open()
+
+class SimpleModal(Button):
+    pass
+
+
