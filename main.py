@@ -10,11 +10,13 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 
 from hexgrid import HexGrid
+from menu import Menu
 
 class HexlandGame(Widget):
     def setup(self):
         self.grid = HexGrid(gridsize = 7)
-        self.add_widget(self.grid)
+        self.menu = Menu()
+        self.add_widget(self.menu)
 
 class HexlandApp(App):
     def build(self):

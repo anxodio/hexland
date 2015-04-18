@@ -1,12 +1,53 @@
-#:kivy 1.8.0
+#:kivy 1.9.0
+#:import Window kivy.core.window.Window
 
 # Debug: Pinta els bordes de tots els widgets
-#<Widget>:
-#    canvas.after:
-#        Line:
-#            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
-#            dash_offset: 5
-#            dash_length: 3
+# <Widget>:
+#     canvas.after:
+#         Line:
+#             rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+#             dash_offset: 5
+#             dash_length: 3
+
+
+<Menu>:
+    logo_img: logo_img
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'center'
+        anchor_y: 'top'
+
+        Image:
+            id: logo_img
+            size_hint: 0.8,0.3
+            source: 'assets/logo.png'
+
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'center'
+        anchor_y: 'bottom'
+        padding: 50
+
+        BoxLayout:
+            size_hint: 0.7,0.5 # Desactivem size_hint
+            orientation: 'vertical'
+            spacing: 10
+            MenuButton:
+                disabled: True
+                text: 'Continue Game (Soon)'
+
+            MenuButton:
+                disabled: True
+                text: 'New Game VS IA (Soon)'
+
+            MenuButton:
+                text: 'New Game PVP'
+
+
+<MenuButton>:
+    background_normal: 'atlas://assets/uitiles/green_button02'
+    background_down: 'atlas://assets/uitiles/green_button03'
+
 
 <HexlandGame>:
     canvas.before:
