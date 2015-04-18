@@ -1,0 +1,116 @@
+#:kivy 1.9.0
+#:import Window kivy.core.window.Window
+
+<MenuLabel@Label>:
+    font_name: 'assets/font.ttf'
+    font_size: 25
+
+<MenuButton@Button>:
+	font_name: 'assets/font.ttf'
+    background_normal: 'atlas://assets/uitiles/green_button02'
+    background_down: 'atlas://assets/uitiles/green_button03'
+
+<MenuToggleButton@ToggleButton>:
+	allow_no_selection: False
+    font_name: 'assets/font.ttf'
+    background_normal: 'atlas://assets/uitiles/green_button11'
+    background_down: 'atlas://assets/uitiles/green_button10'
+
+<Menu>:
+    logo_img: logo_img
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'center'
+        anchor_y: 'top'
+
+        Image:
+            id: logo_img
+            size_hint: 0.8,0.3
+            source: 'assets/logo.png'
+
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'center'
+        anchor_y: 'bottom'
+        padding: 50
+
+        BoxLayout:
+            size_hint: 0.7,0.5
+            orientation: 'vertical'
+            spacing: 10
+            MenuButton:
+                disabled: True
+                text: 'Continue Game (Soon)'
+
+            MenuButton:
+                text: 'New Game'
+                on_release: root.new()
+
+<NewMenu>:
+	opt_5: opt_5
+	opt_7: opt_7
+	opt_9: opt_9
+
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'center'
+        anchor_y: 'center'
+
+        BoxLayout:
+            size_hint: 0.7,0.5
+            orientation: 'vertical'
+            spacing: 10
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10
+            
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: 10
+
+                    MenuLabel:
+                        text: 'Game Type'
+                        bold: True
+
+                    MenuToggleButton:
+                        disabled: True
+                        text: 'VS IA (Soon)'
+                        group: 'vs'
+
+                    MenuToggleButton:
+                        text: 'PVP Hotseat'
+                        group: 'vs'
+                        state: 'down'
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: 10
+
+                    MenuLabel:
+                        text: 'Map Size'
+                        bold: True
+
+                    BoxLayout:
+	                    orientation: 'horizontal'
+	                    spacing: 10
+
+	                    MenuToggleButton:
+	                    	id: opt_5
+	                        text: '5'
+	                        group: 'size'
+
+	                    MenuToggleButton:
+	                    	id: opt_7
+	                        text: '7'
+	                        group: 'size'
+	                        state: 'down'
+
+	                    MenuToggleButton:
+	                    	id: opt_9
+	                        text: '9'
+	                        group: 'size'
+
+            MenuButton:
+                text: 'Start'
+                on_release: root.start()

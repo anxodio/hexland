@@ -20,8 +20,26 @@ class Menu(Widget):
 
         self.logo_img.size_hint = 0.1,0.1
 
-        anim = Animation(size_hint=(0.8,0.3),t='out_bounce')
-        anim.start(self.logo_img)
+        Animation(size_hint=(0.8,0.3),t='out_bounce').start(self.logo_img)
 
-class MenuButton(Button):
-    pass
+    def new(self):
+        self.parent.setup()
+
+class NewMenu(Widget):
+
+    opt_5 = ObjectProperty(None)
+    opt_7 = ObjectProperty(None)
+    opt_9 = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(NewMenu, self).__init__(**kwargs)
+
+    def start(self):
+        # Busquem els valors escollits
+        size = 5
+        if self.opt_7.state == "down":
+            size = 7
+        elif self.opt_9.state == "down":
+            size = 9
+
+        self.parent.start(size)
