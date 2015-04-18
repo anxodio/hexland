@@ -173,8 +173,6 @@ class HexGrid(ScatterLayout):
                     if dead:
                         self.deadGroups.append(lastGroup)
 
-        self.deleteGroups()
-
     def deleteGroups(self):
         if self.deadGroups:
             sz = self.gridsize
@@ -184,6 +182,7 @@ class HexGrid(ScatterLayout):
                     if t and t.group in self.deadGroups:
                         t.content = 0 # buidem casella
 
+    # Pinta de costat caselles (jugadors) i grups
     def debugGrid(self):
         txt = ""
         sz = self.gridsize
@@ -192,6 +191,15 @@ class HexGrid(ScatterLayout):
                 t = self.grid[y][x]
                 if t:
                     txt += str(t.content)
+                else: 
+                    txt += " "
+
+            txt += " " # deixem un espai entre mig
+
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t:
+                    txt += str(t.group)
                 else: 
                     txt += " "
             txt += "\n"
@@ -229,6 +237,8 @@ class HexGrid(ScatterLayout):
                 self.deleteGroups()
                 self.nextPlayer()
                 self.reloadGridGraphics()
+
+            self.debugGrid()
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
