@@ -10,6 +10,7 @@ from kivy.uix.image import Image
 from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty
 from kivy.atlas import Atlas
 from kivy.vector import Vector
+from kivy.core.window import Window
 
 from utils import point_inside_polygon
 import random
@@ -100,8 +101,8 @@ class HexGrid(ScatterLayout):
         self.player = 1
 
         # Posicio i mida segons mida GRID
-        self.pos = 10,10
         self.size = self.gridsize*65,89+(int(self.gridsize/2)*(35+65))
+        self.pos = Window.size[0]/2-self.size[0]/2,Window.size[1]/2-self.size[1]/2
 
         # Com es la illa? Aleatori
         possibleBases = ['tileAutumn','tileGrass','tileSnow','tileMagic','tileLava','tileStone','tileRock']
