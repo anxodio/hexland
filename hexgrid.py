@@ -358,8 +358,8 @@ class HexGrid(ScatterLayout):
                     score[t.content]+=1
 
         # Sumem mortes
-        score[1] += self.deads[2]
-        score[2] += self.deads[1]
+        score[1] += self.deads[2] if 2 in self.deads else 0
+        score[2] += self.deads[1] if 1 in self.deads else 0
 
         # Qui ha guanyat?
         whowin = "1"
@@ -367,7 +367,8 @@ class HexGrid(ScatterLayout):
             whowin = "2"
 
         # Esborrem partida, mostrem guanyador, tornem al menu
-        self.store.delete('save')
+        if self.store.exists('save'):
+            self.store.delete('save')
         launchSimpleModal("Game Finished\nPlayer "+whowin+" WINS!")
         self.parent.parent.gameOver()
 

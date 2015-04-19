@@ -1,7 +1,7 @@
-#!/usr/bin/env python#:include button.kv
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = "0.0.1"
+__version__ = "0.5.0"
 
 import kivy
 kivy.require('1.9.0')
