@@ -8,7 +8,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
-from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty,BooleanProperty
+from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty,BooleanProperty,DictProperty
 from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
@@ -108,7 +108,8 @@ class HexGrid(ScatterLayout):
         self.store = DictStore('hexland.dict')
 
         self.grid = []
-        
+        self.deads = {}
+
         self.setup()
 
         # Si ens construeixen amb estat, el carreguem
@@ -133,6 +134,7 @@ class HexGrid(ScatterLayout):
     def getState(self):
         state = {}
         state["player"] = self.player
+        state["deads"] = self.deads
 
         grid = []
         sz = self.gridsize
@@ -163,6 +165,8 @@ class HexGrid(ScatterLayout):
 
         if not state["player"] == self.player: # Nomes 2 jugadors
             self.nextPlayer()
+
+        self.deads = state["deads"]
 
 
     def setupGrid(self):
@@ -238,6 +242,13 @@ class HexGrid(ScatterLayout):
                 for x in range(0,sz):
                     t = self.grid[y][x]
                     if t and t.group in self.deadGroups:
+                        # Contem la mort
+                        pl = t.content
+                        if pl in self.deads:
+                            self.deads[pl]+=1
+                        else:
+                            self.deads[pl]=1
+
                         t.content = 0 # buidem casella
 
     # Pinta de costat caselles (jugadors) i grups
@@ -262,6 +273,7 @@ class HexGrid(ScatterLayout):
                     txt += " "
             txt += "\n"
         print txt
+        print self.deads
 
 
     def reloadGridGraphics(self):
@@ -322,9 +334,7 @@ class HexGrid(ScatterLayout):
     def doPass(self):
         if self.lastPass:
             # Final del joc
-            self.store.delete('save')
-            launchSimpleModal("Game Finished")
-            self.parent.parent.gameover()
+            self.gameOver()            
         else:
             self.nextPlayer()
             self.lastPass = True
@@ -334,6 +344,32 @@ class HexGrid(ScatterLayout):
         if self.player == 1: self.player = 2
         elif self.player == 2: self.player = 1
         self.gui.setPlayerText(self.player)
+
+    def gameOver(self):
+        # Mirem qui ha guanyat
+        score = {1:0,2:0}
+
+        # Primer caselles al mapa
+        sz = self.gridsize
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = self.grid[x][y]
+                if t and t.content:
+                    score[t.content]+=1
+
+        # Sumem mortes
+        score[1] += self.deads[2]
+        score[2] += self.deads[1]
+
+        # Qui ha guanyat?
+        whowin = "1"
+        if score[2]>score[1]:
+            whowin = "2"
+
+        # Esborrem partida, mostrem guanyador, tornem al menu
+        self.store.delete('save')
+        launchSimpleModal("Game Finished\nPlayer "+whowin+" WINS!")
+        self.parent.parent.gameOver()
 
 
 class HexGame(FloatLayout):

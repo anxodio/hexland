@@ -43,7 +43,7 @@ class HexlandGame(Widget):
         anim.bind(on_complete=complete)
         anim.start(self.getCurrentScreenWidget())
 
-    def gameover(self):
+    def gameOver(self):
 
         def complete(anim,widget):
             self.clear_widgets()
