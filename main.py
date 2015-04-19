@@ -18,8 +18,8 @@ class HexlandGame(Widget):
     def __init__(self, **kwargs):
         super(HexlandGame, self).__init__(**kwargs)
 
-        self.add_widget(HexGame(gridsize = 5))
-        # self.add_widget(Menu())
+        # self.add_widget(HexGame(gridsize = 5))
+        self.add_widget(Menu())
 
     def setup(self):
 
@@ -32,11 +32,11 @@ class HexlandGame(Widget):
         anim.bind(on_complete=complete)
         anim.start(self.getCurrentScreenWidget())
 
-    def start(self,size):
+    def start(self,size,state=None):
 
         def complete(anim,widget):
             self.clear_widgets()
-            self.add_widget(HexGame(d=0.5,opacity=0,gridsize=size))
+            self.add_widget(HexGame(d=0.5,opacity=0,gridsize=size,state=state))
             Animation(opacity=1).start(self.getCurrentScreenWidget())
 
         anim = Animation(d=0.5,opacity=0)

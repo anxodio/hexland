@@ -40,8 +40,9 @@
             orientation: 'vertical'
             spacing: 10
             MenuButton:
-                disabled: True
-                text: 'Continue Game (Soon)'
+                disabled: root.continueDisabled()
+                text: 'Continue Game'
+                on_release: root.load()
 
             MenuButton:
                 text: 'New Game'

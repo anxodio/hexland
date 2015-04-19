@@ -9,6 +9,7 @@ from kivy.uix.button import Button
 from kivy.atlas import Atlas
 from kivy.properties import ObjectProperty
 from kivy.animation import Animation
+from kivy.storage.dictstore import DictStore
 
 class Menu(Widget):
 
@@ -16,7 +17,9 @@ class Menu(Widget):
 
     def __init__(self, **kwargs):
         self.uiatlas = Atlas('assets/uitiles.atlas')
+        self.store = DictStore('hexland.dict')
         super(Menu, self).__init__(**kwargs)
+
 
         self.logo_img.size_hint = 0.1,0.1
 
@@ -24,6 +27,16 @@ class Menu(Widget):
 
     def new(self):
         self.parent.setup()
+
+    def load(self):
+        state = self.store.get('save')['state']
+        size = len(state['grid'])
+        self.parent.start(size,state)
+
+    def continueDisabled(self):
+        return not self.store.exists('save')
+
+
 
 class NewMenu(Widget):
 

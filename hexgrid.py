@@ -12,6 +12,7 @@ from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectPr
 from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
+from kivy.storage.dictstore import DictStore
 
 from utils import point_inside_polygon
 from utils import launchSimpleModal
@@ -92,6 +93,7 @@ class HexGrid(ScatterLayout):
     def __init__(self,**kwargs):
         super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.,auto_bring_to_front=False)
         self.gridsize = kwargs['gridsize']
+        self.gui = kwargs['gui']
 
         # Preparem atlas d'imatges pels tiles
         self.baseatlas = Atlas('assets/basetiles.atlas')
@@ -101,9 +103,17 @@ class HexGrid(ScatterLayout):
         # Nomes gridsize inparell
         assert(self.gridsize%2 != 0)
 
+        # Preparem store
+        self.store = DictStore('hexland.dict')
+
         self.grid = []
         
         self.setup()
+
+        # Si ens construeixen amb estat, el carreguem
+        if kwargs['state']:
+            self.loadState(kwargs['state'])
+            self.reloadGridGraphics()
 
     def setup(self):
         # Torn del jugador per defecte
@@ -118,21 +128,6 @@ class HexGrid(ScatterLayout):
         self.baseimg = self.baseatlas[random.choice(possibleBases)]
 
         self.setupGrid()
-
-        # Debug
-        state = {
-            'player':1,
-            'grid': [
-                [None,None,0,2,0],
-                [None,0,0,0,0],
-                [1,1,1,0,2],
-                [2,2,1,0,None],
-                [0,2,1,None,None]
-            ]
-        }
-        
-        self.loadState(state)
-        self.reloadGridGraphics()
 
     def getState(self):
         state = {}
@@ -317,13 +312,16 @@ class HexGrid(ScatterLayout):
                 self.nextPlayer()
                 self.reloadGridGraphics()
 
+                # Guardem estat a cada moviment
+                self.store.put('save',state=self.getState())
+
             self.debugGrid()
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
         if self.player == 1: self.player = 2
         elif self.player == 2: self.player = 1
-        self.parent.gui.setPlayerText(self.player)
+        self.gui.setPlayerText(self.player)
 
 
 class HexGame(FloatLayout):
@@ -334,8 +332,8 @@ class HexGame(FloatLayout):
         super(HexGame, self).__init__()
         size = Window.size
 
-        self.grid = HexGrid(gridsize = kwargs['gridsize'])
-        self.gui = GameGui() 
+        self.gui = GameGui()
+        self.grid = HexGrid(gridsize=kwargs['gridsize'],state=kwargs['state'],gui=self.gui)
 
         self.add_widget(self.grid)
         self.add_widget(self.gui)
