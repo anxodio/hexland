@@ -8,7 +8,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
-from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty
+from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty,BooleanProperty
 from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
@@ -89,6 +89,7 @@ class HexGrid(ScatterLayout):
     deadGroups = ListProperty()
     baseimg = ObjectProperty()
     player = NumericProperty()
+    lastPass = BooleanProperty(False) # la ultima jugada ha sigut passar?
 
     def __init__(self,**kwargs):
         super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.,auto_bring_to_front=False)
@@ -311,11 +312,22 @@ class HexGrid(ScatterLayout):
                 self.deleteGroups()
                 self.nextPlayer()
                 self.reloadGridGraphics()
+                self.lastPass = False
 
                 # Guardem estat a cada moviment
                 self.store.put('save',state=self.getState())
 
             self.debugGrid()
+
+    def doPass(self):
+        if self.lastPass:
+            # Final del joc
+            self.store.delete('save')
+            launchSimpleModal("Game Finished")
+            self.parent.parent.gameover()
+        else:
+            self.nextPlayer()
+            self.lastPass = True
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
@@ -348,4 +360,4 @@ class GameGui(FloatLayout):
         self.lbl_player.text = "Player "+str(num)+" turn"
 
     def passTurn(self):
-        self.parent.grid.nextPlayer()
+        self.parent.grid.doPass()

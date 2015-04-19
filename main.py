@@ -43,6 +43,17 @@ class HexlandGame(Widget):
         anim.bind(on_complete=complete)
         anim.start(self.getCurrentScreenWidget())
 
+    def gameover(self):
+
+        def complete(anim,widget):
+            self.clear_widgets()
+            self.add_widget(Menu())
+            Animation(opacity=1).start(self.getCurrentScreenWidget())
+
+        anim = Animation(d=0.5,opacity=0)
+        anim.bind(on_complete=complete)
+        anim.start(self.getCurrentScreenWidget())
+
     def getCurrentScreenWidget(self):
         return self.children[0]
 
