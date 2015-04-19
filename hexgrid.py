@@ -6,6 +6,7 @@ kivy.require('1.9.0')
 
 from kivy.uix.widget import Widget
 from kivy.uix.scatterlayout import ScatterLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.properties import StringProperty,NumericProperty,ListProperty,ObjectProperty
 from kivy.atlas import Atlas
@@ -89,7 +90,7 @@ class HexGrid(ScatterLayout):
     player = NumericProperty()
 
     def __init__(self,**kwargs):
-        super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.)
+        super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.,auto_bring_to_front=False)
         self.gridsize = kwargs['gridsize']
 
         # Preparem atlas d'imatges pels tiles
@@ -256,7 +257,31 @@ class HexGrid(ScatterLayout):
         # Gestiona el canvi de jugador
         if self.player == 1: self.player = 2
         elif self.player == 2: self.player = 1
+        self.parent.gui.setPlayerText(self.player)
 
 
+class HexGame(FloatLayout):
+    grid = ObjectProperty(None)
+    gui = ObjectProperty(None)
 
+    def __init__(self,**kwargs):
+        super(HexGame, self).__init__()
+        size = Window.size
 
+        self.grid = HexGrid(gridsize = kwargs['gridsize'])
+        self.gui = GameGui() 
+
+        self.add_widget(self.grid)
+        self.add_widget(self.gui)
+
+class GameGui(FloatLayout):
+    lbl_player = ObjectProperty(None)
+
+    def __init__(self,**kwargs):
+        super(GameGui, self).__init__()
+
+    def setPlayerText(self,num):
+        self.lbl_player.text = "Player "+str(num)+" turn"
+
+    def passTurn(self):
+        self.parent.grid.nextPlayer()

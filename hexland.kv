@@ -1,5 +1,7 @@
 #:kivy 1.9.0
+#:import Window kivy.core.window.Window
 #:include menu.kv
+
 
 # Debug: Pinta els bordes de tots els widgets
 # <Widget>:
@@ -48,3 +50,41 @@
         size: root.size # posicio i mida del pare
         pos: root.pos[0],root.pos[1]+22
 
+<GameGui>:
+    lbl_player: lbl_player
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'left'
+        anchor_y: 'top'
+        padding: 5
+
+        Label:
+            id: lbl_player
+            canvas.before:
+                BorderImage:
+                    pos: self.pos
+                    size: self.size
+                    source: 'atlas://assets/uitiles/green_button13'
+
+            text: 'Player 1 turn'
+            bold: True
+            halign: 'center'
+            valign: 'middle'
+            color: 0,0,0,1
+            size_hint: 0.5,0.1
+            text_size: self.size
+            font_name: 'assets/font.ttf'
+
+    AnchorLayout:
+        size: Window.size
+        anchor_x: 'right'
+        anchor_y: 'top'
+        padding: 5
+
+        Button:
+            font_name: 'assets/font.ttf'
+            background_normal: 'atlas://assets/uitiles/green_button02'
+            background_down: 'atlas://assets/uitiles/green_button03'
+            text: 'Pass'
+            size_hint: 0.5,0.1
+            on_release: root.passTurn()

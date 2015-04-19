@@ -10,7 +10,7 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.animation import Animation
 
-from hexgrid import HexGrid
+from hexgrid import HexGame
 from menu import Menu, NewMenu
 
 class HexlandGame(Widget):
@@ -18,7 +18,7 @@ class HexlandGame(Widget):
     def __init__(self, **kwargs):
         super(HexlandGame, self).__init__(**kwargs)
 
-        self.add_widget(HexGrid(gridsize = 5))
+        self.add_widget(HexGame(gridsize = 5))
         # self.add_widget(Menu())
 
     def setup(self):
@@ -36,7 +36,7 @@ class HexlandGame(Widget):
 
         def complete(anim,widget):
             self.clear_widgets()
-            self.add_widget(HexGrid(d=0.5,opacity=0,gridsize=size))
+            self.add_widget(HexGame(d=0.5,opacity=0,gridsize=size))
             Animation(opacity=1).start(self.getCurrentScreenWidget())
 
         anim = Animation(d=0.5,opacity=0)
