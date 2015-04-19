@@ -119,6 +119,55 @@ class HexGrid(ScatterLayout):
 
         self.setupGrid()
 
+        # Debug
+        state = {
+            'player':1,
+            'grid': [
+                [None,None,0,2,0],
+                [None,0,0,0,0],
+                [1,1,1,0,2],
+                [2,2,1,0,None],
+                [0,2,1,None,None]
+            ]
+        }
+        
+        self.loadState(state)
+        self.reloadGridGraphics()
+
+    def getState(self):
+        state = {}
+        state["player"] = self.player
+
+        grid = []
+        sz = self.gridsize
+        for y in range(0,sz):
+            row = []
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t:
+                    row.append(t.content)
+                else:
+                    row.append(None)
+            grid.append(row)
+        state["grid"] = grid
+        return state
+
+    def loadState(self,state):
+        grid = state["grid"]
+        sz = len(grid)
+
+        # No pot passar que aixo sigui diferent
+        assert(sz == self.gridsize)
+
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = grid[y][x]
+                if t is not None:
+                    self.grid[y][x].content = t
+
+        if not state["player"] == self.player: # Nomes 2 jugadors
+            self.nextPlayer()
+
 
     def setupGrid(self):
         # Crea i configura el grid
@@ -239,11 +288,28 @@ class HexGrid(ScatterLayout):
 
     def manageTurn(self,t):
         if t.content == 0: # si ja està ocupada res
+            # Guardem estat actual (per si hem de cancelar la jugada)
+            state = self.getState()
             t.content = self.player
+
             self.setTileGroups()
+
             # Validem que no hi hagi suicidi
+            dead = False
             if t.group in self.deadGroups:
-                t.content = 0
+                # Pot ser que sigui un suicidi d'atac: Estas matant un altre grup i per tant no mors
+                # Per compvoar això, si hi ha més d'un grup mort, treiem el nostre grup dels grups
+                # morts, matem els grups, refem els grups, i si estem vius es jugada valida
+                dead = True
+                if len(self.deadGroups) > 1:
+                    self.deadGroups.remove(t.group)
+                    self.deleteGroups()
+                    self.setTileGroups()
+                    if not t.group in self.deadGroups:
+                        dead = False
+
+            if dead:
+                self.loadState(state)
                 launchSimpleModal("INVALID MOVE\nYou can't suicide.")
             else:
                 # Correcte, seguim jugada
