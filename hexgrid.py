@@ -23,6 +23,7 @@ class Tile(Widget):
     grid_y = NumericProperty()
     content = NumericProperty()
     group = NumericProperty()
+    usedByTerrain = BooleanProperty()
     upperimg = ObjectProperty()
 
     # Hexagon points: Punts del hexagon en la part superior, pel control de colisions
@@ -36,6 +37,7 @@ class Tile(Widget):
     def __init__(self,**kwargs):
 
         self.group = 0 # No te grup
+        self.usedByTerrain = False # No utilitzat per comptar terreny
         self.content = kwargs['content']
         self.gridparent = kwargs['caller']
         self.grid_x = kwargs['grid_x']
@@ -108,7 +110,8 @@ class HexGrid(ScatterLayout):
         self.store = DictStore('hexland.dict')
 
         self.grid = []
-        self.deads = {}
+        self.deads = {1:0,2:0}
+        self.resetScore()
 
         self.setup()
 
@@ -135,6 +138,8 @@ class HexGrid(ScatterLayout):
         state = {}
         state["player"] = self.player
         state["deads"] = self.deads
+        state["tileScore"] = self.tileScore
+        state["terrScore"] = self.terrScore
 
         grid = []
         sz = self.gridsize
@@ -167,7 +172,8 @@ class HexGrid(ScatterLayout):
             self.nextPlayer()
 
         self.deads = state["deads"]
-
+        self.tileScore = state["tileScore"]
+        self.terrScore = state["terrScore"]
 
     def setupGrid(self):
         # Crea i configura el grid
@@ -198,7 +204,12 @@ class HexGrid(ScatterLayout):
             return None
         return self.grid[y][x]
 
-    # Agrupa els tiles connectats
+    # Reseteja les puntuacions actuals
+    def resetScore(self):
+        self.tileScore = {1:0,2:0}
+        self.terrScore = {1:0,2:0}
+
+    # Reseteja els grups dels tiles
     def resetTileGroups(self):
         sz = self.gridsize
         for y in range(0,sz):
@@ -206,19 +217,40 @@ class HexGrid(ScatterLayout):
                 t = self.grid[y][x]
                 if t: t.group = 0 # No te grup
 
+    # Reseteja la marca de si el tile ha estat fet servir per puntuar terreny
+    def resetTileUsed(self):
+        sz = self.gridsize
+        for y in range(0,sz):
+            for x in range(0,sz):
+                t = self.grid[y][x]
+                if t: t.usedByTerrain = False
+
     # Assigna tot el grup. També comprova si es un grup mort
     def recursiveSetGroup(self,t,grpnum,dead=True):
         t.group = grpnum
         for nt in t.getNeighbors():
             if nt.content == 0:
-                dead = False # el grup té com a minim una llibertat
+                dead = False # el grup té com a minim una llibertat,
             elif not nt.group and nt.content == t.content: # No te grup i mateix jugador
                 dead = self.recursiveSetGroup(nt,grpnum,dead)
         return dead
 
-    # Agrupa els tiles connectats, aprofita el bucle per comprovar grups morts
+    # Assigna tot el grup de terreny buit. Torna també informacio per puntuacio de terrany
+    def recursiveSetTerrainGroup(self,t,grpnum,terrInfo):
+        t.group = grpnum
+        terrInfo['count']+=1
+        for nt in t.getNeighbors():
+            if nt.content: # es un jugador, el sumem i marquem com a fet servit (per a aquest grup)
+                nt.used = True
+                terrInfo[nt.content]+=1 
+            elif not nt.group and nt.content == 0: # No te grup i mateix jugador
+                terrInfo = self.recursiveSetTerrainGroup(nt,grpnum,terrInfo)
+        return terrInfo
+
+    # Agrupa els tiles connectats, aprofita el bucle per comprovar grups morts i calcular puntuacio
     def setTileGroups(self):
         self.resetTileGroups()
+        self.resetScore()
 
         self.deadGroups = []
 
@@ -227,13 +259,29 @@ class HexGrid(ScatterLayout):
         for y in range(0,sz):
             for x in range(0,sz):
                 t = self.grid[y][x]
-                # si es 0 no te sentit agrupar, i no ha de tenir ja grup assignat
-                if t and t.content and t.group == 0:
-                    # Assignem nou grup
-                    lastGroup += 1
-                    dead = self.recursiveSetGroup(t,lastGroup)
-                    if dead:
-                        self.deadGroups.append(lastGroup)
+                if t:
+                    # Si no es buida, la sumem com a puntuacio de caselles del jugador (tile)
+                    if t.content:
+                        self.tileScore[t.content]+=1
+
+                    if t.group == 0:
+                        # Assignem nou grup
+                        lastGroup += 1
+                        if t.content:
+                            dead = self.recursiveSetGroup(t,lastGroup)
+                            if dead:
+                                self.deadGroups.append(lastGroup)
+                        else:
+                            self.resetTileUsed()
+                            terrInfo = {'count':0,1:0,2:0}
+                            terrInfo = self.recursiveSetTerrainGroup(t,lastGroup,terrInfo)
+
+                            # Puntuacio de terreny
+                            if terrInfo[1]>terrInfo[2]:
+                                self.terrScore[1]+=terrInfo['count']
+                            elif terrInfo[1]<terrInfo[2]:
+                                self.terrScore[2]+=terrInfo['count']
+
 
     def deleteGroups(self):
         if self.deadGroups:
@@ -268,12 +316,12 @@ class HexGrid(ScatterLayout):
             for x in range(0,sz):
                 t = self.grid[y][x]
                 if t:
-                    txt += str(t.group)
+                    txt += str(t.group) #if t.content else str(0) # per no liar, no imprimim els grups de caselles buides
                 else: 
                     txt += " "
             txt += "\n"
         print txt
-        print self.deads
+        print self.score()
 
 
     def reloadGridGraphics(self):
@@ -345,31 +393,39 @@ class HexGrid(ScatterLayout):
         elif self.player == 2: self.player = 1
         self.gui.setPlayerText(self.player)
 
-    def gameOver(self):
-        # Mirem qui ha guanyat
+    # Retorna la puntuació en un moment concret, desglosada
+    def score(self):
         score = {1:0,2:0}
-
-        # Primer caselles al mapa
-        sz = self.gridsize
-        for y in range(0,sz):
-            for x in range(0,sz):
-                t = self.grid[x][y]
-                if t and t.content:
-                    score[t.content]+=1
+        deadScore = {1:0,2:0}
 
         # Sumem mortes
-        score[1] += self.deads[2] if 2 in self.deads else 0
-        score[2] += self.deads[1] if 1 in self.deads else 0
+        deadScore[1] += self.deads[2] if 2 in self.deads else 0
+        deadScore[2] += self.deads[1] if 1 in self.deads else 0
+
+        for k in score.keys():
+            score[k]+=deadScore[k]+self.tileScore[k]+self.terrScore[k]
+
+        score['tileScore'] = self.tileScore
+        score['terrScore'] = self.terrScore
+        score['deadScore'] = deadScore
+
+        return score
+
+
+    def gameOver(self):
+        score = self.score()
 
         # Qui ha guanyat?
-        whowin = "1"
-        if score[2]>score[1]:
-            whowin = "2"
+        whowin = "TIE!"
+        if score[1]>score[2]:
+            whowin = "Player 1 WINS!"
+        elif score[1]<score[2]:
+            whowin = "Player 2 WINS!"
 
         # Esborrem partida, mostrem guanyador, tornem al menu
         if self.store.exists('save'):
             self.store.delete('save')
-        launchSimpleModal("Game Finished\nPlayer "+whowin+" WINS!")
+        launchSimpleModal("Game Finished\nP1: "+str(score[1])+" | P2: "+str(score[2])+"\n"+whowin)
         self.parent.parent.gameOver()
 
 
