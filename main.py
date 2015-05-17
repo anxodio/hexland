@@ -22,33 +22,21 @@ class HexlandGame(Widget):
         self.add_widget(Menu())
 
     def setup(self):
-
-        def complete(anim,widget):
-            self.clear_widgets()
-            self.add_widget(NewMenu(opacity=0))
-            Animation(d=0.5,opacity=1).start(self.getCurrentScreenWidget())
-
-        anim = Animation(d=0.5,opacity=0)
-        anim.bind(on_complete=complete)
-        anim.start(self.getCurrentScreenWidget())
+        self.changeScreen(NewMenu())
 
     def start(self,size,vs,state=None):
-
-        def complete(anim,widget):
-            self.clear_widgets()
-            self.add_widget(HexGame(d=0.5,opacity=0,gridsize=size,gametype=vs,state=state))
-            Animation(opacity=1).start(self.getCurrentScreenWidget())
-
-        anim = Animation(d=0.5,opacity=0)
-        anim.bind(on_complete=complete)
-        anim.start(self.getCurrentScreenWidget())
+        self.changeScreen(HexGame(gridsize=size,gametype=vs,state=state),0)
 
     def gameOver(self):
+        self.changeScreen(Menu())
+
+    def changeScreen(self,nextScreen,enterDuration=0.5):
 
         def complete(anim,widget):
             self.clear_widgets()
-            self.add_widget(Menu())
-            Animation(opacity=1).start(self.getCurrentScreenWidget())
+            nextScreen.opacity = 0
+            self.add_widget(nextScreen)
+            Animation(d=enterDuration,opacity=1).start(self.getCurrentScreenWidget())
 
         anim = Animation(d=0.5,opacity=0)
         anim.bind(on_complete=complete)
@@ -56,6 +44,10 @@ class HexlandGame(Widget):
 
     def getCurrentScreenWidget(self):
         return self.children[0]
+
+    def on_pause(self):
+        # no cal guardar res ja que es guarda automaticament
+        return True
 
 class HexlandApp(App):
     def build(self):
