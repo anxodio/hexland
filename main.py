@@ -45,14 +45,15 @@ class HexlandGame(Widget):
     def getCurrentScreenWidget(self):
         return self.children[0]
 
-    def on_pause(self):
-        # no cal guardar res ja que es guarda automaticament
-        return True
 
 class HexlandApp(App):
     def build(self):
         game = HexlandGame()
         return game
+
+    def on_pause(self):
+        # no cal guardar res ja que es guarda automaticament
+        return True
 
 
 if __name__ == '__main__':
