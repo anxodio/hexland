@@ -381,10 +381,16 @@ class HexGrid(ScatterLayout):
             else:
                 # Correcte, seguim jugada
                 return True
+        else:
+            return False
 
     def manageTurn(self,t,playerMove=True):
         # Si el jugador intenta jugar mentre es el torn de la IA, no fem res
         if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
+            return False
+
+        # En cap cas es pot jugar sobre una casella ocupada
+        if not t.content == 0:
             return False
 
         state = self.getState()
@@ -407,7 +413,7 @@ class HexGrid(ScatterLayout):
     def doPass(self,playerMove=True):
         if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
             return False
-        
+
         if self.lastPass:
             # Final del joc
             self.gameOver()
