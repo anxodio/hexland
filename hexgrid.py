@@ -14,8 +14,11 @@ from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.storage.dictstore import DictStore
 
+from cpuplayer import CpuPlayer
+
 from utils import point_inside_polygon
 from utils import launchSimpleModal
+from utils import GAMETYPE
 import random
 
 class Tile(Widget):
@@ -87,6 +90,7 @@ class Tile(Widget):
 
 class HexGrid(ScatterLayout):
     gridsize = NumericProperty()
+    gametype = NumericProperty()
     grid = ListProperty()
     deadGroups = ListProperty()
     baseimg = ObjectProperty()
@@ -96,6 +100,7 @@ class HexGrid(ScatterLayout):
     def __init__(self,**kwargs):
         super(HexGrid, self).__init__(do_rotation=False,scale_min=.5, scale_max=3.,auto_bring_to_front=False)
         self.gridsize = kwargs['gridsize']
+        self.gametype = kwargs['gametype']
         self.gui = kwargs['gui']
 
         # Preparem atlas d'imatges pels tiles
@@ -120,6 +125,10 @@ class HexGrid(ScatterLayout):
             self.loadState(kwargs['state'])
             self.reloadGridGraphics()
 
+        # Si estem vs cpu, creem el jugador CPU
+        if not self.gametype == GAMETYPE["PVP"]:
+            self.cpu = CpuPlayer(self.gametype)
+
     def setup(self):
         # Torn del jugador per defecte
         self.player = 1
@@ -137,6 +146,7 @@ class HexGrid(ScatterLayout):
     def getState(self):
         state = {}
         state["player"] = self.player
+        state["gametype"] = int(self.gametype)
         state["deads"] = self.deads
         state["tileScore"] = self.tileScore
         state["terrScore"] = self.terrScore
@@ -171,6 +181,7 @@ class HexGrid(ScatterLayout):
         if not state["player"] == self.player: # Nomes 2 jugadors
             self.nextPlayer()
 
+        self.gametype = state["gametype"]
         self.deads = state["deads"]
         self.tileScore = state["tileScore"]
         self.terrScore = state["terrScore"]
@@ -341,8 +352,8 @@ class HexGrid(ScatterLayout):
 
                         t.upperimg = self.playeratlas[random.choice(posibles)]
 
-
-    def manageTurn(self,t):
+    # Realitza un moviment. Torna fals si no es possible (suicidi), o true en cas contrari
+    def doMovement(self,t):
         if t.content == 0: # si ja està ocupada res
             # Guardem estat actual (per si hem de cancelar la jugada)
             state = self.getState()
@@ -366,32 +377,53 @@ class HexGrid(ScatterLayout):
 
             if dead:
                 self.loadState(state)
-                launchSimpleModal("INVALID MOVE\nYou can't suicide.")
+                return False
             else:
                 # Correcte, seguim jugada
-                self.deleteGroups()
-                self.nextPlayer()
-                self.reloadGridGraphics()
-                self.lastPass = False
+                return True
 
-                # Guardem estat a cada moviment
-                self.store.put('save',state=self.getState())
+    def manageTurn(self,t,playerMove=True):
+        # Si el jugador intenta jugar mentre es el torn de la IA, no fem res
+        if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
+            return False
 
-            self.debugGrid()
+        state = self.getState()
 
-    def doPass(self):
+        if self.doMovement(t):
+            # Correcte, seguim jugada
+            self.deleteGroups()
+            self.nextPlayer()
+            self.reloadGridGraphics()
+            self.lastPass = False
+
+            # Guardem estat a cada moviment
+            self.store.put('save',state=self.getState())
+        else:
+            launchSimpleModal("INVALID MOVE\nYou can't suicide.")
+
+        self.debugGrid()
+
+
+    def doPass(self,playerMove=True):
+        if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
+            return False
+        
         if self.lastPass:
             # Final del joc
-            self.gameOver()            
+            self.gameOver()
         else:
-            self.nextPlayer()
             self.lastPass = True
+            self.nextPlayer()
 
     def nextPlayer(self):
         # Gestiona el canvi de jugador
         if self.player == 1: self.player = 2
         elif self.player == 2: self.player = 1
         self.gui.setPlayerText(self.player)
+
+        if not self.gametype == GAMETYPE["PVP"] and self.player == 2:
+            self.cpu.move(self)
+
 
     # Retorna la puntuació en un moment concret, desglosada
     def score(self):
@@ -438,7 +470,7 @@ class HexGame(FloatLayout):
         size = Window.size
 
         self.gui = GameGui()
-        self.grid = HexGrid(gridsize=kwargs['gridsize'],state=kwargs['state'],gui=self.gui)
+        self.grid = HexGrid(gridsize=kwargs['gridsize'],gametype=kwargs['gametype'],state=kwargs['state'],gui=self.gui)
 
         self.add_widget(self.grid)
         self.add_widget(self.gui)

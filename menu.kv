@@ -49,9 +49,11 @@
                 on_release: root.new()
 
 <NewMenu>:
-	opt_5: opt_5
-	opt_7: opt_7
-	opt_9: opt_9
+    opt_5: opt_5
+    opt_7: opt_7
+    opt_9: opt_9
+    opt_ia: opt_ia
+    opt_pvp: opt_pvp
 
     AnchorLayout:
         size: Window.size
@@ -75,11 +77,12 @@
                         text: 'Game Type'
 
                     MenuToggleButton:
-                        disabled: True
-                        text: 'VS IA (Soon)'
+                        id: opt_ia
+                        text: 'VS IA'
                         group: 'vs'
 
                     MenuToggleButton:
+                        id: opt_pvp
                         text: 'PVP Hotseat'
                         group: 'vs'
                         state: 'down'

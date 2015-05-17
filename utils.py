@@ -7,6 +7,15 @@ kivy.require('1.9.0')
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
 
+
+# CONSTANTS
+GAMETYPE = {
+    'IA_EASY': 0,
+    'PVP': 1
+}
+
+
+
 # Permet detectar colisio sobre qualsevol poligon
 # poly es una llista de parelles (x,y), punts formant el poligon
 def point_inside_polygon(x, y, poly):

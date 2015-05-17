@@ -11,6 +11,8 @@ from kivy.properties import ObjectProperty
 from kivy.animation import Animation
 from kivy.storage.dictstore import DictStore
 
+from utils import GAMETYPE
+
 class Menu(Widget):
 
     logo_img = ObjectProperty(None)
@@ -31,7 +33,8 @@ class Menu(Widget):
     def load(self):
         state = self.store.get('save')['state']
         size = len(state['grid'])
-        self.parent.start(size,state)
+        vs = state['gametype']
+        self.parent.start(size,vs,state)
 
     def continueDisabled(self):
         return not self.store.exists('save')
@@ -44,6 +47,9 @@ class NewMenu(Widget):
     opt_7 = ObjectProperty(None)
     opt_9 = ObjectProperty(None)
 
+    opt_ia = ObjectProperty(None)
+    opt_pvp = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(NewMenu, self).__init__(**kwargs)
 
@@ -55,4 +61,8 @@ class NewMenu(Widget):
         elif self.opt_9.state == "down":
             size = 9
 
-        self.parent.start(size)
+        vs = GAMETYPE["PVP"]
+        if self.opt_ia.state == "down":
+            vs = GAMETYPE["IA_EASY"]
+
+        self.parent.start(size,vs)
