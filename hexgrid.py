@@ -53,13 +53,16 @@ class Tile(Widget):
 
         super(Tile, self).__init__(**kwargs)
 
+        baseX = self.gridparent.size[0]/2-self.gridparent.drawgridsize[0]/2
+        baseY = self.gridparent.size[1]/2-self.gridparent.drawgridsize[1]/2
+
         # Diferencia amb el centre, segons el que mourem horitzontalment les diferents files
         dif = self.grid_y-int(self.gridparent.gridsize/2)
         offset = 32*dif
 
         # posicio final, tenint en compte que y=0 està abaix, girem vertricalment
         # perque tingui sentit amb l'array guardada
-        self.pos = offset+self.grid_x*65,(self.gridparent.gridsize-self.grid_y-1)*50
+        self.pos = baseX+offset+self.grid_x*65,baseY+(self.gridparent.gridsize-self.grid_y-1)*50
 
     def on_touch_down(self, touch):
         touch.grab(self) # Preparo el touch (l'agafo)
@@ -138,7 +141,11 @@ class HexGrid(ScatterLayout):
         self.player = 1
 
         # Posicio i mida segons mida GRID
-        self.size = self.gridsize*65,89+(int(self.gridsize/2)*(35+65))
+        self.drawgridsize = self.gridsize*65,89+(int(self.gridsize/2)*(35+65))
+
+        self.size[0] = 1000
+        self.size[1] = 1000
+
         self.pos = Window.size[0]/2-self.size[0]/2,Window.size[1]/2-self.size[1]/2
 
         # Com es la illa? Aleatori
