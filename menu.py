@@ -7,7 +7,7 @@ kivy.require('1.9.0')
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.atlas import Atlas
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.animation import Animation
 from kivy.storage.dictstore import DictStore
 from kivy.core.window import Window
@@ -36,6 +36,9 @@ class Menu(Widget):
         size = len(state['grid'])
         vs = state['gametype']
         self.parent.start(size,vs,state)
+
+    def help(self):
+        self.parent.help()
 
     def continueDisabled(self):
         return not self.store.exists('save')
@@ -71,6 +74,34 @@ class NewMenu(Widget):
             vs = GAMETYPE["IA_EASY"]
 
         self.parent.start(size,vs)
+
+    def onBackBtn(self, window, key, *args):
+        """ To be called whenever user presses Back/Esc Key """
+        # If user presses Back/Esc Key
+        if key == 27:
+            self.parent.gameOver()
+            return True
+        return False
+
+class Help(Widget):
+
+    helpText = StringProperty("")
+
+    def __init__(self, **kwargs):
+        super(Help, self).__init__(**kwargs)
+        Window.bind(on_keyboard=self.onBackBtn)
+
+        self.helpText = """
+Welcome to Hexland!
+*******************
+
+Hexland is a game based in Go, and ancient oriental table game. If know how to play Go, you can play Hexland without any problem.
+
+The objective is conquer the island, getting more terrain than your adversary. In every turn you put a single building in the island. If your buildings surround the other player buildings, their buildings are destroyed.
+You can't suicide (put a building in a sorrounded position), unless you sorround your adversary at same time. So try to keep always at least two eyes in your formations to protect them of being surrounded.
+
+Game finishes when the two players pass turn in a row, and the player with more buildings, surrounded terrain and kills wins the game.
+        """
 
     def onBackBtn(self, window, key, *args):
         """ To be called whenever user presses Back/Esc Key """

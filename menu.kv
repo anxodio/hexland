@@ -39,6 +39,7 @@
             size_hint: 0.7,0.5
             orientation: 'vertical'
             spacing: 10
+
             MenuButton:
                 disabled: root.continueDisabled()
                 text: 'Continue Game'
@@ -47,6 +48,11 @@
             MenuButton:
                 text: 'New Game'
                 on_release: root.new()
+
+            MenuButton:
+                size_hint: 1,0.7
+                text: 'Help'
+                on_release: root.help()
 
 <NewMenu>:
     opt_5: opt_5
@@ -120,6 +126,22 @@
                 size_hint: 1,0.3
                 text: 'Start'
                 on_release: root.start()
+
+<Help>:
+    size: Window.size
+
+    BoxLayout:
+        size: root.size
+        orientation: 'vertical'
+        padding: 10
+
+        Label:
+            font_name: 'assets/font.ttf'
+            text_size: self.size
+            text: root.helpText
+            valign: 'middle'
+            halign: 'center'
+
 
 <SimpleModal>:
     halign: 'center'

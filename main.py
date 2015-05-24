@@ -11,7 +11,7 @@ from kivy.uix.widget import Widget
 from kivy.animation import Animation
 
 from hexgrid import HexGame
-from menu import Menu, NewMenu
+from menu import Menu, NewMenu, Help
 
 class HexlandGame(Widget):
 
@@ -29,6 +29,9 @@ class HexlandGame(Widget):
 
     def gameOver(self):
         self.changeScreen(Menu())
+
+    def help(self):
+        self.changeScreen(Help())
 
     def changeScreen(self,nextScreen,enterDuration=0.5):
 
