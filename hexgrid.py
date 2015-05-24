@@ -13,6 +13,8 @@ from kivy.atlas import Atlas
 from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.storage.dictstore import DictStore
+from kivy.clock import Clock, mainthread
+from functools import partial
 
 from cpuplayer import CpuPlayer
 
@@ -20,6 +22,7 @@ from utils import point_inside_polygon
 from utils import launchSimpleModal
 from utils import GAMETYPE
 import random
+import threading
 
 class Tile(Widget):
     grid_x = NumericProperty()
@@ -122,7 +125,7 @@ class HexGrid(ScatterLayout):
 
         # Si ens construeixen amb estat, el carreguem
         if kwargs['state']:
-            self.loadState(kwargs['state'])
+            self.loadState(kwargs['state'],True)
             self.reloadGridGraphics()
 
         # Si estem vs cpu, creem el jugador CPU
@@ -165,7 +168,7 @@ class HexGrid(ScatterLayout):
         state["grid"] = grid
         return state
 
-    def loadState(self,state):
+    def loadState(self,state,fromContinue=False):
         grid = state["grid"]
         sz = len(grid)
 
@@ -178,7 +181,7 @@ class HexGrid(ScatterLayout):
                 if t is not None:
                     self.grid[y][x].content = t
 
-        if not state["player"] == self.player: # Nomes 2 jugadors
+        if fromContinue and not state["player"] == self.player: # Nomes 2 jugadors
             self.nextPlayer()
 
         self.gametype = state["gametype"]
@@ -327,7 +330,7 @@ class HexGrid(ScatterLayout):
             for x in range(0,sz):
                 t = self.grid[y][x]
                 if t:
-                    txt += str(t.group) #if t.content else str(0) # per no liar, no imprimim els grups de caselles buides
+                    txt += str(t.group) if t.content else str(0) # per no liar, no imprimim els grups de caselles buides
                 else: 
                     txt += " "
             txt += "\n"
@@ -352,12 +355,13 @@ class HexGrid(ScatterLayout):
 
                         t.upperimg = self.playeratlas[random.choice(posibles)]
 
+
     # Realitza un moviment. Torna fals si no es possible (suicidi), o true en cas contrari
-    def doMovement(self,t):
+    def doMovement(self,t,player=None):
         if t.content == 0: # si ja està ocupada res
-            # Guardem estat actual (per si hem de cancelar la jugada)
-            state = self.getState()
-            t.content = self.player
+            # Per poder provar jugades desde l'ordinador
+            if player: t.content = player
+            else: t.content = self.player
 
             self.setTileGroups()
 
@@ -369,18 +373,24 @@ class HexGrid(ScatterLayout):
                 # morts, matem els grups, refem els grups, i si estem vius es jugada valida
                 dead = True
                 if len(self.deadGroups) > 1:
+                    state = self.getState()
                     self.deadGroups.remove(t.group)
+                    otherDeads = self.deadGroups
+
                     self.deleteGroups()
                     self.setTileGroups()
                     if not t.group in self.deadGroups:
                         dead = False
 
-            if dead:
-                self.loadState(state)
-                return False
-            else:
-                # Correcte, seguim jugada
-                return True
+                    self.deadGroups = otherDeads
+                    self.loadState(state)
+
+            return not dead
+            # if dead:
+            #     return False
+            # else:
+            #     # Correcte, seguim jugada
+            #     return True
         else:
             return False
 
@@ -398,16 +408,19 @@ class HexGrid(ScatterLayout):
         if self.doMovement(t):
             # Correcte, seguim jugada
             self.deleteGroups()
-            self.nextPlayer()
             self.reloadGridGraphics()
             self.lastPass = False
 
+            self.debugGrid()
+
             # Guardem estat a cada moviment
             self.store.put('save',state=self.getState())
+            self.nextPlayer()
         else:
+            self.loadState(state)
             launchSimpleModal("INVALID MOVE\nYou can't suicide.")
 
-        self.debugGrid()
+        
 
 
     def doPass(self,playerMove=True):
@@ -421,15 +434,19 @@ class HexGrid(ScatterLayout):
             self.lastPass = True
             self.nextPlayer()
 
+    def getNextPlayerNum(self,player):
+        if player == 1: player = 2
+        elif player == 2: player = 1
+        return player
+
     def nextPlayer(self):
         # Gestiona el canvi de jugador
-        if self.player == 1: self.player = 2
-        elif self.player == 2: self.player = 1
+        self.player = self.getNextPlayerNum(self.player)
         self.gui.setPlayerText(self.player)
 
         if not self.gametype == GAMETYPE["PVP"] and self.player == 2:
-            self.cpu.move(self)
-
+            # Clock.schedule_once(partial(self.cpu.move, self))
+            threading.Thread(target=self.cpu.move, args=(self,)).start()
 
     # Retorna la puntuació en un moment concret, desglosada
     def score(self):
@@ -449,7 +466,7 @@ class HexGrid(ScatterLayout):
 
         return score
 
-
+    @mainthread
     def gameOver(self):
         score = self.score()
 

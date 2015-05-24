@@ -63,6 +63,6 @@ class NewMenu(Widget):
 
         vs = GAMETYPE["PVP"]
         if self.opt_ia.state == "down":
-            vs = GAMETYPE["IA_EASY"]
+            vs = GAMETYPE["IA_DUMMY"]
 
         self.parent.start(size,vs)

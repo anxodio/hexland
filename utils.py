@@ -10,8 +10,9 @@ from kivy.uix.button import Button
 
 # CONSTANTS
 GAMETYPE = {
-    'IA_EASY': 0,
-    'PVP': 1
+    'PVP': 0,
+    'IA_DUMMY': 1,
+    'IA_EASY': 2
 }
 
 

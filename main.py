@@ -18,7 +18,7 @@ class HexlandGame(Widget):
     def __init__(self, **kwargs):
         super(HexlandGame, self).__init__(**kwargs)
 
-        # self.add_widget(HexGame(gridsize = 5))
+        #self.add_widget(HexGame(gridsize = 5,gametype=2,state=None))
         self.add_widget(Menu())
 
     def setup(self):
