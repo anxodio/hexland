@@ -5,6 +5,10 @@ import random
 import itertools
 from copy import deepcopy
 from utils import GAMETYPE
+from kivy.clock import mainthread
+
+from kivy.uix.modalview import ModalView
+from utils import SimpleModal
 
 class CpuPlayer():
 
@@ -16,15 +20,28 @@ class CpuPlayer():
         self.type = cputype
         self.transtable = {}
 
+        self.view = ModalView(size_hint=(0.4, 0.1),auto_dismiss=False)
+        self.view.add_widget(SimpleModal(text="CPU Moving..."))
+
+    @mainthread
+    def showModal(self):
+        self.view.open()
+
+    @mainthread
+    def hideModal(self):
+        self.view.dismiss()
+
     # hg is hexgrid
     def move(self,hg,*largs):
 
+        self.showModal()
         opt = {
             GAMETYPE["IA_DUMMY"]: self.mvDummy,
             GAMETYPE["IA_EASY"]: self.mvNegamax,
         }
 
         opt[self.type](hg)
+        self.hideModal()
         return True
         
 

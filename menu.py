@@ -47,7 +47,8 @@ class NewMenu(Widget):
     opt_7 = ObjectProperty(None)
     opt_9 = ObjectProperty(None)
 
-    opt_ia = ObjectProperty(None)
+    opt_iadummy = ObjectProperty(None)
+    opt_iaeasy = ObjectProperty(None)
     opt_pvp = ObjectProperty(None)
 
     def __init__(self, **kwargs):
@@ -62,7 +63,9 @@ class NewMenu(Widget):
             size = 9
 
         vs = GAMETYPE["PVP"]
-        if self.opt_ia.state == "down":
+        if self.opt_iadummy.state == "down":
             vs = GAMETYPE["IA_DUMMY"]
+        elif self.opt_iaeasy.state == "down":
+            vs = GAMETYPE["IA_EASY"]
 
         self.parent.start(size,vs)

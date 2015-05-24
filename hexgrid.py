@@ -132,6 +132,7 @@ class HexGrid(ScatterLayout):
         if not self.gametype == GAMETYPE["PVP"]:
             self.cpu = CpuPlayer(self.gametype)
 
+
     def setup(self):
         # Torn del jugador per defecte
         self.player = 1
@@ -414,18 +415,20 @@ class HexGrid(ScatterLayout):
             self.debugGrid()
 
             # Guardem estat a cada moviment
-            self.store.put('save',state=self.getState())
             self.nextPlayer()
+            self.store.put('save',state=self.getState())
         else:
             self.loadState(state)
             launchSimpleModal("INVALID MOVE\nYou can't suicide.")
 
-        
 
-
+    @mainthread
     def doPass(self,playerMove=True):
         if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
             return False
+
+        if not self.gametype == GAMETYPE["PVP"] and self.player == 2:
+            launchSimpleModal("CPU passed.")
 
         if self.lastPass:
             # Final del joc
@@ -445,8 +448,10 @@ class HexGrid(ScatterLayout):
         self.gui.setPlayerText(self.player)
 
         if not self.gametype == GAMETYPE["PVP"] and self.player == 2:
-            # Clock.schedule_once(partial(self.cpu.move, self))
-            threading.Thread(target=self.cpu.move, args=(self,)).start()
+            self.startCpu()
+
+    def startCpu(self):
+        threading.Thread(target=self.cpu.move, args=(self,)).start()
 
     # Retorna la puntuació en un moment concret, desglosada
     def score(self):

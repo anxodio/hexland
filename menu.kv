@@ -7,12 +7,12 @@
     bold: True
 
 <MenuButton@Button>:
-	font_name: 'assets/font.ttf'
+    font_name: 'assets/font.ttf'
     background_normal: 'atlas://assets/uitiles/green_button02'
     background_down: 'atlas://assets/uitiles/green_button03'
 
 <MenuToggleButton@ToggleButton>:
-	allow_no_selection: False
+    allow_no_selection: False
     font_name: 'assets/font.ttf'
     background_normal: 'atlas://assets/uitiles/green_button11'
     background_down: 'atlas://assets/uitiles/green_button10'
@@ -52,7 +52,8 @@
     opt_5: opt_5
     opt_7: opt_7
     opt_9: opt_9
-    opt_ia: opt_ia
+    opt_iadummy: opt_iadummy
+    opt_iaeasy: opt_iaeasy
     opt_pvp: opt_pvp
 
     AnchorLayout:
@@ -77,8 +78,13 @@
                         text: 'Game Type'
 
                     MenuToggleButton:
-                        id: opt_ia
-                        text: 'VS IA'
+                        id: opt_iadummy
+                        text: 'VS IA (DUMMY)'
+                        group: 'vs'
+
+                    MenuToggleButton:
+                        id: opt_iaeasy
+                        text: 'VS IA (EASY)'
                         group: 'vs'
 
                     MenuToggleButton:
@@ -94,27 +100,24 @@
                     MenuLabel:
                         text: 'Map Size'
 
-                    BoxLayout:
-	                    orientation: 'horizontal'
-	                    spacing: 10
+                    MenuToggleButton:
+                        id: opt_5
+                        text: '5'
+                        group: 'size'
 
-	                    MenuToggleButton:
-	                    	id: opt_5
-	                        text: '5'
-	                        group: 'size'
+                    MenuToggleButton:
+                        id: opt_7
+                        text: '7'
+                        group: 'size'
+                        state: 'down'
 
-	                    MenuToggleButton:
-	                    	id: opt_7
-	                        text: '7'
-	                        group: 'size'
-	                        state: 'down'
-
-	                    MenuToggleButton:
-	                    	id: opt_9
-	                        text: '9'
-	                        group: 'size'
+                    MenuToggleButton:
+                        id: opt_9
+                        text: '9'
+                        group: 'size'
 
             MenuButton:
+                size_hint: 1,0.3
                 text: 'Start'
                 on_release: root.start()
 
