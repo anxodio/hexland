@@ -10,6 +10,7 @@ from kivy.atlas import Atlas
 from kivy.properties import ObjectProperty
 from kivy.animation import Animation
 from kivy.storage.dictstore import DictStore
+from kivy.core.window import Window
 
 from utils import GAMETYPE
 
@@ -53,6 +54,7 @@ class NewMenu(Widget):
 
     def __init__(self, **kwargs):
         super(NewMenu, self).__init__(**kwargs)
+        Window.bind(on_keyboard=self.onBackBtn)
 
     def start(self):
         # Busquem els valors escollits
@@ -69,3 +71,11 @@ class NewMenu(Widget):
             vs = GAMETYPE["IA_EASY"]
 
         self.parent.start(size,vs)
+
+    def onBackBtn(self, window, key, *args):
+        """ To be called whenever user presses Back/Esc Key """
+        # If user presses Back/Esc Key
+        if key == 27:
+            self.parent.gameOver()
+            return True
+        return False

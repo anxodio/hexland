@@ -151,9 +151,9 @@ class CpuPlayer():
             if t and not t.content:
                 lliures += 1
 
-        if lliures > 12:
+        if lliures > 10:
             ply = 4
-        elif lliures > 6:
+        elif lliures > 5:
             ply = 6
         else:
             ply = 8

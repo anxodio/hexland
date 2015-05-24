@@ -502,6 +502,9 @@ class HexGame(FloatLayout):
 
     def __init__(self,**kwargs):
         super(HexGame, self).__init__()
+
+        Window.bind(on_keyboard=self.onBackBtn)
+
         size = Window.size
 
         self.gui = GameGui()
@@ -509,6 +512,14 @@ class HexGame(FloatLayout):
 
         self.add_widget(self.grid)
         self.add_widget(self.gui)
+
+    def onBackBtn(self, window, key, *args):
+        """ To be called whenever user presses Back/Esc Key """
+        # If user presses Back/Esc Key
+        if key == 27:
+            self.parent.gameOver()
+            return True
+        return False
 
 class GameGui(FloatLayout):
     lbl_player = ObjectProperty(None)
