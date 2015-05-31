@@ -262,8 +262,8 @@ class HexGrid(ScatterLayout):
         t.group = grpnum
         terrInfo['count']+=1
         for nt in t.getNeighbors():
-            if nt.content: # es un jugador, el sumem i marquem com a fet servit (per a aquest grup)
-                nt.used = True
+            if nt.content and not nt.usedByTerrain: # es un jugador, el sumem i marquem com a fet servit (per a aquest grup)
+                nt.usedByTerrain = True
                 terrInfo[nt.content]+=1 
             elif not nt.group and nt.content == 0: # No te grup i mateix jugador
                 terrInfo = self.recursiveSetTerrainGroup(nt,grpnum,terrInfo)
