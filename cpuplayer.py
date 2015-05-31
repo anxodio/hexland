@@ -5,7 +5,8 @@ import random
 import itertools
 from copy import deepcopy
 from utils import GAMETYPE
-from kivy.clock import mainthread
+from kivy.clock import Clock, mainthread
+import time
 
 from kivy.uix.modalview import ModalView
 from utils import SimpleModal
@@ -46,6 +47,8 @@ class CpuPlayer():
         
 
     def mvDummy(self,hg):
+        time.sleep(0.5) # we need a minimum time
+
         sz = hg.gridsize
         possibles = list(itertools.product(range(0,sz),range(0,sz)))
 
@@ -142,6 +145,8 @@ class CpuPlayer():
         return bestValue,bestX,bestY
 
     def mvNegamax(self,hg):
+        time.sleep(0.1) # we need a minimum time
+
         player = hg.player
 
         lliures = 0

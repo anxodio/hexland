@@ -402,6 +402,7 @@ class HexGrid(ScatterLayout):
         else:
             return False
 
+    @mainthread
     def manageTurn(self,t,playerMove=True):
         # Si el jugador intenta jugar mentre es el torn de la IA, no fem res
         if playerMove and not self.gametype == GAMETYPE["PVP"] and self.player == 2:
