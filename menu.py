@@ -40,6 +40,9 @@ class Menu(Widget):
     def help(self):
         self.parent.help()
 
+    def credits(self):
+        self.parent.credits()
+
     def continueDisabled(self):
         return not self.store.exists('save')
 
@@ -83,15 +86,29 @@ class NewMenu(Widget):
             return True
         return False
 
-class Help(Widget):
 
-    helpText = StringProperty("")
+class TextScreen(Widget):
+
+    screenText = StringProperty("")
+
+    def __init__(self, **kwargs):
+        super(TextScreen, self).__init__(**kwargs)
+        Window.bind(on_keyboard=self.onBackBtn)
+    
+    def onBackBtn(self, window, key, *args):
+        """ To be called whenever user presses Back/Esc Key """
+        # If user presses Back/Esc Key
+        if key == 27:
+            self.parent.gameOver()
+            return True
+        return False
+
+class Help(TextScreen):
 
     def __init__(self, **kwargs):
         super(Help, self).__init__(**kwargs)
-        Window.bind(on_keyboard=self.onBackBtn)
 
-        self.helpText = """
+        self.screenText = """
 Welcome to Hexland!
 *******************
 
@@ -103,10 +120,19 @@ You can't suicide (put a building in a sorrounded position), unless you sorround
 Game finishes when the two players pass turn in a row, and the player with more buildings, surrounded terrain and kills wins the game.
         """
 
-    def onBackBtn(self, window, key, *args):
-        """ To be called whenever user presses Back/Esc Key """
-        # If user presses Back/Esc Key
-        if key == 27:
-            self.parent.gameOver()
-            return True
-        return False
+
+class Credits(TextScreen):
+
+    def __init__(self, **kwargs):
+        super(Credits, self).__init__(**kwargs)
+
+        self.screenText = """
+Credits
+*********
+
+Hexland is a game developed by Angel Fernández, inside the Final Degree Project at Universitat Autònoma de Barcelona, tutorized by Antoni Gurgui.
+
+Thanks to Kenney (@KenneyWings) for his awesome assets
+Thanks to Oriol (@oriolet) for his cool logo rework
+Thanks to Podington Bear (@podington_bear) for his beauty bso music
+        """

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = "0.7.2"
+__version__ = "0.8.0"
 
 import kivy
 kivy.require('1.9.0')
@@ -9,9 +9,11 @@ kivy.require('1.9.0')
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.animation import Animation
+from kivy.core.audio import SoundLoader
 
 from hexgrid import HexGame
-from menu import Menu, NewMenu, Help
+from menu import Menu, NewMenu, Help, Credits
+from utils import playClickSound
 
 class HexlandGame(Widget):
 
@@ -33,6 +35,9 @@ class HexlandGame(Widget):
     def help(self):
         self.changeScreen(Help())
 
+    def credits(self):
+        self.changeScreen(Credits())
+
     def changeScreen(self,nextScreen,enterDuration=0.5):
 
         def complete(anim,widget):
@@ -44,6 +49,7 @@ class HexlandGame(Widget):
         anim = Animation(d=0.5,opacity=0)
         anim.bind(on_complete=complete)
         anim.start(self.getCurrentScreenWidget())
+        playClickSound()
 
     def getCurrentScreenWidget(self):
         return self.children[0]
@@ -52,11 +58,22 @@ class HexlandGame(Widget):
 class HexlandApp(App):
     def build(self):
         game = HexlandGame()
+        self.playBSO()
         return game
 
     def on_pause(self):
         # no cal guardar res ja que es guarda automaticament
         return True
+
+    def playClickSound(self):
+        playClickSound()
+
+    def playBSO(self):
+        self.bso = SoundLoader.load('assets/serenity.mp3')
+        if self.bso:
+            self.bso.loop = True
+            self.bso.volume = 0.7
+            self.bso.play()
 
 
 if __name__ == '__main__':

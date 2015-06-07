@@ -16,6 +16,8 @@
     font_name: 'assets/font.ttf'
     background_normal: 'atlas://assets/uitiles/green_button11'
     background_down: 'atlas://assets/uitiles/green_button10'
+    on_press: app.playClickSound()
+
 
 <Menu>:
     logo_img: logo_img
@@ -36,7 +38,7 @@
         padding: 50
 
         BoxLayout:
-            size_hint: 0.7,0.5
+            size_hint: 0.7,0.6
             orientation: 'vertical'
             spacing: 10
 
@@ -53,6 +55,11 @@
                 size_hint: 1,0.7
                 text: 'Help'
                 on_release: root.help()
+
+            MenuButton:
+                size_hint: 1,0.7
+                text: 'Credits'
+                on_release: root.credits()
 
 <NewMenu>:
     opt_5: opt_5
@@ -127,7 +134,7 @@
                 text: 'Start'
                 on_release: root.start()
 
-<Help>:
+<TextScreen>:
     size: Window.size
 
     BoxLayout:
@@ -138,7 +145,7 @@
         Label:
             font_name: 'assets/font.ttf'
             text_size: self.size
-            text: root.helpText
+            text: root.screenText
             valign: 'middle'
             halign: 'center'
 

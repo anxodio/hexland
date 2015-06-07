@@ -6,6 +6,7 @@ kivy.require('1.9.0')
 
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
+from kivy.core.audio import SoundLoader
 
 
 # CONSTANTS
@@ -14,7 +15,6 @@ GAMETYPE = {
     'IA_DUMMY': 1,
     'IA_EASY': 2
 }
-
 
 
 # Permet detectar colisio sobre qualsevol poligon
@@ -37,6 +37,11 @@ def point_inside_polygon(x, y, poly):
                         inside = not inside
         p1x, p1y = p2x, p2y
     return inside
+
+def playClickSound():
+    sound = SoundLoader.load('assets/click.ogg')
+    if sound:
+        sound.play()
 
 def launchSimpleModal(text):
     view = ModalView(size_hint=(0.4, 0.2))

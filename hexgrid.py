@@ -21,6 +21,7 @@ from cpuplayer import CpuPlayer
 from utils import point_inside_polygon
 from utils import launchSimpleModal
 from utils import GAMETYPE
+from utils import playClickSound
 import random
 import threading
 
@@ -428,6 +429,7 @@ class HexGrid(ScatterLayout):
         else:
             self.loadState(state)
             launchSimpleModal("INVALID MOVE\nYou can't suicide.")
+        playClickSound()
 
 
     @mainthread
